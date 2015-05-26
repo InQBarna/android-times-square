@@ -12,6 +12,7 @@
 
   <declare-styleable name="calendar_cell">
     <attr name="state_selectable" format="boolean" />
+    <attr name="state_margin" format="boolean" />
     <attr name="state_current_month" format="boolean" />
     <attr name="state_today" format="boolean" />
     <attr name="state_range_first" format="boolean" />
