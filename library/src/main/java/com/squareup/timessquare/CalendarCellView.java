@@ -96,7 +96,7 @@ public class CalendarCellView extends TextView {
             mergeDrawableStates(drawableState, STATE_SELECTABLE);
         }
 
-        if (isMargin && isSelectable) {
+        if (isMargin) {
             mergeDrawableStates(drawableState, STATE_MARGIN);
         }
         if (isCurrentMonth) {
