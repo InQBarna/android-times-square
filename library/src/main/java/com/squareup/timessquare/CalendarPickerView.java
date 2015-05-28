@@ -70,6 +70,7 @@ public class CalendarPickerView extends ListView {
     final MonthView.Listener listener = new CellClickedListener();
     final List<MonthDescriptor> months = new ArrayList<MonthDescriptor>();
     final List<MonthCellDescriptor> selectedCells = new ArrayList<MonthCellDescriptor>();
+    final List<MonthCellDescriptor> marginCells = new ArrayList<MonthCellDescriptor>();
     final List<MonthCellDescriptor> highlightedCells = new ArrayList<MonthCellDescriptor>();
     final List<Calendar> selectedCals = new ArrayList<Calendar>();
     final List<Calendar> marginCals = new ArrayList<Calendar>();
@@ -108,14 +109,6 @@ public class CalendarPickerView extends ListView {
         }
     }
 
-    public void setMargin(Collection<Date> marginDates) {
-        marginCals.clear();
-        if (marginDates != null) {
-            for (Date date : marginDates) {
-                marginDate(date);
-            }
-        }
-    }
 
     public List<CalendarCellDecorator> getDecorators() {
         return decorators;
@@ -287,7 +280,7 @@ public class CalendarPickerView extends ListView {
          * visible.
          */
         public FluentInitializer withSelectedDate(Date selectedDates) {
-            return withSelectedDates(Arrays.asList(selectedDates), null);
+            return withSelectedDates(Arrays.asList(selectedDates));
         }
 
         /**
@@ -295,7 +288,7 @@ public class CalendarPickerView extends ListView {
          * pass in multiple dates and haven't already called {@link #inMode(SelectionMode)}.
          */
 
-        public FluentInitializer withSelectedDates(Collection<Date> selectedDates, Collection<Date> marginDates) {
+        public FluentInitializer withSelectedDates(Collection<Date> selectedDates) {
             if (selectionMode == SelectionMode.SINGLE && selectedDates.size() > 1) {
                 throw new IllegalArgumentException("SINGLE mode can't be used with multiple selectedDates");
             }
@@ -336,6 +329,51 @@ public class CalendarPickerView extends ListView {
             displayOnly = true;
             return this;
         }
+    }
+    private void clearAllChoises() {
+        selectedCals.clear();
+        selectedCells.clear();
+        marginCals.clear();
+        marginCells.clear();
+        for( List<List<MonthCellDescriptor>> sudoListCells : cells) {
+            for( List<MonthCellDescriptor> listCells : sudoListCells) {
+                for(MonthCellDescriptor cell : listCells) {
+                    if(cell.isSelected())
+                        cell.setSelected(false);
+                    if(cell.isMargin()) {
+                        cell.setMargin(false);
+                    }
+                }
+            }
+        }
+    }
+    public void selectDates(Collection<Date> selectedDates, Collection<Date> marginDates){
+        clearAllChoises();
+
+        if (selectionMode == SelectionMode.SINGLE && selectedDates.size() > 1 ||
+                selectionMode == SelectionMode.SINGLE && marginDates.size() > 1  ) {
+            throw new IllegalArgumentException("SINGLE mode can't be used with multiple selectedDates");
+        }
+        if (selectionMode == SelectionMode.RANGE && selectedDates.size() > 2 ||
+                selectionMode == SelectionMode.RANGE && marginDates.size() > 2   ) {
+            throw new IllegalArgumentException(
+                    "RANGE mode only allows two selectedDates.  You tried to pass " + selectedDates.size());
+        }
+
+        if (selectedDates != null) {
+            for (Date date : selectedDates) {
+                selectDate(date);
+            }
+        }
+        if (marginDates != null) {
+            for (Date date : marginDates) {
+                marginDate(date, false);
+            }
+        }
+
+        scrollToSelectedDates();
+
+        validateAndUpdate();
     }
 
     private void validateAndUpdate() {
@@ -556,24 +594,31 @@ public class CalendarPickerView extends ListView {
      *
      * @return - whether we were able to set the date
      */
-    public boolean selectDate(Date date, boolean smoothScroll) {
+    private boolean selectDate(Date date, boolean smoothScroll) {
         validateDate(date);
 
         MonthCellWithMonthIndex monthCellWithMonthIndex = getMonthCellWithIndexByDate(date);
         if (monthCellWithMonthIndex == null || !isDateSelectable(date)) {
             return false;
         }
+
         boolean wasSelected = doSelectDate(date, monthCellWithMonthIndex.cell);
         if (wasSelected) {
             scrollToSelectedMonth(monthCellWithMonthIndex.monthIndex, smoothScroll);
         }
         return wasSelected;
-    }
 
-    private void marginDate(Date date) {
-        Calendar marginCal = Calendar.getInstance(locale);
-        marginCal.setTime(date);
-        marginCals.add(marginCal);
+    }
+    private void marginDate(Date date, boolean smoothScroll) {
+        validateDate(date);
+
+        MonthCellWithMonthIndex monthCellWithMonthIndex = getMonthCellWithIndexByDate(date);
+        if (monthCellWithMonthIndex == null || !isDateSelectable(date)) {
+            return;
+        }
+
+       doMarginDate(date, monthCellWithMonthIndex.cell);
+
     }
 
     private void validateDate(Date date) {
@@ -656,8 +701,32 @@ public class CalendarPickerView extends ListView {
         validateAndUpdate();
         return date != null;
     }
+    private boolean doMarginDate(Date date, MonthCellDescriptor cell) {
+        Calendar newlyMarginCal = Calendar.getInstance(locale);
+        newlyMarginCal.setTime(date);
+        // Sanitize input: clear out the hours/minutes/seconds/millis.
+        setMidnight(newlyMarginCal);
 
-    private void clearOldSelections() {
+        // Clear any remaining range state.
+        for (MonthCellDescriptor marginCell : marginCells) {
+            marginCell.setRangeState(RangeState.NONE);
+        }
+
+        if (date != null) {
+            // Select a new cell.
+            if (marginCells.size() == 0 || !marginCells.get(0).equals(cell)) {
+                marginCells.add(cell);
+                cell.setMargin(true);
+            }
+            marginCals.add(newlyMarginCal);
+        }
+
+        // Update the adapter.
+        validateAndUpdate();
+        return date != null;
+    }
+
+    public void clearOldSelections() {
         for (MonthCellDescriptor selectedCell : selectedCells) {
             // De-select the currently-selected cell.
             selectedCell.setSelected(false);
@@ -832,7 +901,6 @@ public class CalendarPickerView extends ListView {
                 Date date = cal.getTime();
                 boolean isCurrentMonth = cal.get(MONTH) == month.getMonth();
                 boolean isSelected = isCurrentMonth && containsDate(selectedCals, cal);
-//        TODO: SI ES MARGE
                 boolean isMargin = isCurrentMonth && containsDate(marginCals, cal);
                 boolean isSelectable =
                         isCurrentMonth && betweenDates(cal, minCal, maxCal) && isDateSelectable(date);
