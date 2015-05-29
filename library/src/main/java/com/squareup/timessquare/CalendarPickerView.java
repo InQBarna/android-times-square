@@ -368,7 +368,7 @@ public class CalendarPickerView extends ListView {
         if (marginDates != null) {
             for (Date date : marginDates) {
                 if(checkValidDate(date))
-                    marginDate(date, false);
+                    marginDate(date);
             }
         }
 
@@ -376,6 +376,9 @@ public class CalendarPickerView extends ListView {
 
         validateAndUpdate();
     }
+
+
+
 
     private void validateAndUpdate() {
         if (getAdapter() == null) {
@@ -616,7 +619,11 @@ public class CalendarPickerView extends ListView {
         return wasSelected;
 
     }
-    private void marginDate(Date date, boolean smoothScroll) {
+    public void scrollToCurrentDate(Date date) {
+        MonthCellWithMonthIndex monthCellWithMonthIndex = getMonthCellWithIndexByDate(date);
+        scrollToSelectedMonth(monthCellWithMonthIndex.monthIndex, false);
+    }
+    private void marginDate(Date date) {
         validateDate(date);
 
         MonthCellWithMonthIndex monthCellWithMonthIndex = getMonthCellWithIndexByDate(date);
