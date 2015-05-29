@@ -3,6 +3,7 @@
   <style name="CalendarTitle">
     <item name="android:textSize">@dimen/calendar_text_medium</item>
     <item name="android:textStyle">bold</item>
+      <item name="android:layout_marginLeft">15dp</item>
   </style>
 
   <style name="CalendarCell">

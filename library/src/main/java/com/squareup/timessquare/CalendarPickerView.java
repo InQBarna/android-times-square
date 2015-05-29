@@ -128,7 +128,7 @@ public class CalendarPickerView extends ListView {
         dayTextColorResId = a.getResourceId(R.styleable.CalendarPickerView_dayTextColor,
                 R.color.calendar_text_selector);
         titleTextColor = a.getColor(R.styleable.CalendarPickerView_titleTextColor,
-                res.getColor(R.color.calendar_text_active));
+                res.getColor(R.color.calendar_text_title));
         displayHeader = a.getBoolean(R.styleable.CalendarPickerView_displayHeader, true);
         headerTextColor = a.getColor(R.styleable.CalendarPickerView_headerTextColor,
                 res.getColor(R.color.calendar_text_active));
@@ -205,7 +205,6 @@ public class CalendarPickerView extends ListView {
         this.selectionMode = SelectionMode.SINGLE;
         // Clear out any previously-selected dates/cells.
         selectedCals.clear();
-//        marginCals.clear();
         selectedCells.clear();
         highlightedCals.clear();
         highlightedCells.clear();

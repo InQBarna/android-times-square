@@ -10,8 +10,9 @@
   <color name="calendar_selected_range_bg">#ff96caff</color>
   <color name="calendar_text_inactive">#d6d6d6</color>
   <color name="calendar_text_active">#828282</color>
+  <color name="calendar_text_title">#ffde0000</color>
   <color name="calendar_text_selected">#ffffff</color>
   <color name="calendar_text_margin">#7f827f</color>
   <color name="calendar_text_highlighted">#7f827f</color>
-  <color name="calendar_text_unselectable">#828282</color>
+  <color name="calendar_text_unselectable">#d6d6d6</color>
 </resources>
