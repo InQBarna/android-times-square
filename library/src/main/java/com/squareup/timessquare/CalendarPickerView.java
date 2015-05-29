@@ -635,7 +635,7 @@ public class CalendarPickerView extends ListView {
 
     }
 
-    private void validateDate(Date date) {
+    public void validateDate(Date date) {
         if (date == null) {
             throw new IllegalArgumentException("Selected date must be non-null.");
         }
@@ -645,6 +645,12 @@ public class CalendarPickerView extends ListView {
                             + "%nminDate: %s%nmaxDate: %s%nselectedDate: %s", minCal.getTime(), maxCal.getTime(),
                     date));
         }
+    }
+    public void noValidDate(Date date) {
+        throw new IllegalArgumentException(String.format(
+                "SelectedDate must be between minDate and maxDate."
+                        + "%nminDate: %s%nmaxDate: %s%nselectedDate: %s", minCal.getTime(), maxCal.getTime(),
+                date));
     }
 
     private boolean doSelectDate(Date date, MonthCellDescriptor cell) {
