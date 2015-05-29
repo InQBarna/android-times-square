@@ -362,12 +362,14 @@ public class CalendarPickerView extends ListView {
 
         if (selectedDates != null) {
             for (Date date : selectedDates) {
-                selectDate(date);
+                if(checkValidDate(date))
+                    selectDate(date);
             }
         }
         if (marginDates != null) {
             for (Date date : marginDates) {
-                marginDate(date, false);
+                if(checkValidDate(date))
+                    marginDate(date, false);
             }
         }
 
@@ -566,6 +568,12 @@ public class CalendarPickerView extends ListView {
                 }
             }
         }
+    }
+    public boolean checkValidDate(Date date) {
+        if (!betweenDates(date, minCal, maxCal) || !isDateSelectable(date)) {
+                return false;
+        }
+        return true;
     }
 
     /**
