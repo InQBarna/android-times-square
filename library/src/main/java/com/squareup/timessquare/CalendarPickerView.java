@@ -462,13 +462,14 @@ public class CalendarPickerView extends ListView {
         getLayoutParams().height = getMeasuredHeight();
         getLayoutParams().width = getMeasuredWidth();
         // Post this runnable so it runs _after_ the dimen changes have been applied/re-measured.
-        post(new Runnable() {
-            @Override
-            public void run() {
-                Logr.d("Dimens are fixed: now scroll to the selected date");
-                scrollToSelectedDates();
-            }
-        });
+        post(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        Logr.d("Dimens are fixed: now scroll to the selected date");
+                        scrollToSelectedDates();
+                    }
+                });
     }
 
     /**
@@ -571,9 +572,17 @@ public class CalendarPickerView extends ListView {
             }
         }
     }
+
     public boolean checkValidDate(Date date) {
+        return checkValidDate(date, false);
+    }
+
+    public boolean checkValidDate(Date date, boolean withInvalidateNotify) {
         if (!betweenDates(date, minCal, maxCal) || !isDateSelectable(date)) {
-                return false;
+            if (withInvalidateNotify && null != invalidDateListener) {
+                invalidDateListener.onInvalidDateSelected(date);
+            }
+            return false;
         }
         return true;
     }
@@ -635,7 +644,7 @@ public class CalendarPickerView extends ListView {
 
     }
 
-    public void validateDate(Date date) {
+    private void validateDate(Date date) {
         if (date == null) {
             throw new IllegalArgumentException("Selected date must be non-null.");
         }
@@ -645,12 +654,6 @@ public class CalendarPickerView extends ListView {
                             + "%nminDate: %s%nmaxDate: %s%nselectedDate: %s", minCal.getTime(), maxCal.getTime(),
                     date));
         }
-    }
-    public void noValidDate(Date date) {
-        throw new IllegalArgumentException(String.format(
-                "SelectedDate must be between minDate and maxDate."
-                        + "%nminDate: %s%nmaxDate: %s%nselectedDate: %s", minCal.getTime(), maxCal.getTime(),
-                date));
     }
 
     private boolean doSelectDate(Date date, MonthCellDescriptor cell) {
