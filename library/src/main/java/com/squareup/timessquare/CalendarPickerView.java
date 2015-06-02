@@ -144,7 +144,11 @@ public class CalendarPickerView extends ListView {
         minCal = Calendar.getInstance(locale);
         maxCal = Calendar.getInstance(locale);
         monthCounter = Calendar.getInstance(locale);
-        monthNameFormat = new SimpleDateFormat(context.getString(R.string.month_name_format), locale);
+        if (!isInEditMode()) {
+            monthNameFormat = new SimpleDateFormat(context.getString(R.string.month_name_format), locale);
+        } else {
+            monthNameFormat = new SimpleDateFormat("MMM");
+        }
         weekdayNameFormat = new SimpleDateFormat(context.getString(R.string.day_name_format), locale);
         fullDateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
 
@@ -193,8 +197,10 @@ public class CalendarPickerView extends ListView {
         minCal = Calendar.getInstance(locale);
         maxCal = Calendar.getInstance(locale);
         monthCounter = Calendar.getInstance(locale);
-        monthNameFormat =
-                new SimpleDateFormat(getContext().getString(R.string.month_name_format), locale);
+        if (!isInEditMode()) {
+            monthNameFormat =
+                    new SimpleDateFormat(getContext().getString(R.string.month_name_format), locale);
+        } // otherwise it should have been initialized
         for (MonthDescriptor month : months) {
             month.setLabel(monthNameFormat.format(month.getDate()));
         }
