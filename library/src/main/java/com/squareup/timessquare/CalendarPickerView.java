@@ -1,6 +1,7 @@
 // Copyright 2012 Square, Inc.
 package com.squareup.timessquare;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -121,16 +122,16 @@ public class CalendarPickerView extends ListView {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CalendarPickerView);
         final int bg = a.getColor(R.styleable.CalendarPickerView_android_background,
                 res.getColor(R.color.calendar_bg));
-        dividerColor = a.getColor(R.styleable.CalendarPickerView_dividerColor,
+    dividerColor = a.getColor(R.styleable.CalendarPickerView_tsquare_dividerColor,
                 res.getColor(R.color.calendar_divider));
-        dayBackgroundResId = a.getResourceId(R.styleable.CalendarPickerView_dayBackground,
+    dayBackgroundResId = a.getResourceId(R.styleable.CalendarPickerView_tsquare_dayBackground,
                 R.drawable.calendar_bg_selector);
-        dayTextColorResId = a.getResourceId(R.styleable.CalendarPickerView_dayTextColor,
+    dayTextColorResId = a.getResourceId(R.styleable.CalendarPickerView_tsquare_dayTextColor,
                 R.color.calendar_text_selector);
-        titleTextColor = a.getColor(R.styleable.CalendarPickerView_titleTextColor,
+    titleTextColor = a.getColor(R.styleable.CalendarPickerView_tsquare_titleTextColor,
                 res.getColor(R.color.calendar_text_title));
-        displayHeader = a.getBoolean(R.styleable.CalendarPickerView_displayHeader, true);
-        headerTextColor = a.getColor(R.styleable.CalendarPickerView_headerTextColor,
+    displayHeader = a.getBoolean(R.styleable.CalendarPickerView_tsquare_displayHeader, true);
+    headerTextColor = a.getColor(R.styleable.CalendarPickerView_tsquare_headerTextColor,
                 res.getColor(R.color.calendar_text_active));
         a.recycle();
 
@@ -322,6 +323,7 @@ public class CalendarPickerView extends ListView {
             return withHighlightedDates(Arrays.asList(date));
         }
 
+    @SuppressLint("SimpleDateFormat")
         public FluentInitializer setShortWeekdays(String[] newShortWeekdays) {
             DateFormatSymbols symbols = new DateFormatSymbols(locale);
             symbols.setShortWeekdays(newShortWeekdays);
