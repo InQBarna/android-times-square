@@ -4,11 +4,12 @@ package com.squareup.timessquare;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.squareup.timessquare.MonthCellDescriptor.RangeState;
 
-public class CalendarCellView extends TextView {
+public class CalendarCellView extends FrameLayout {
     private static final int[] STATE_SELECTABLE = {
       R.attr.tsquare_state_selectable
     };
@@ -41,6 +42,7 @@ public class CalendarCellView extends TextView {
     private boolean isHighlighted = false;
 
     private RangeState rangeState = RangeState.NONE;
+  private TextView dayOfMonthTextView;
 
     @SuppressWarnings("UnusedDeclaration") //
     public CalendarCellView(Context context, AttributeSet attrs) {
@@ -48,33 +50,46 @@ public class CalendarCellView extends TextView {
     }
 
     public void setSelectable(boolean isSelectable) {
-        this.isSelectable = isSelectable;
-        refreshDrawableState();
+        if (this.isSelectable != isSelectable) {
+            this.isSelectable = isSelectable;
+            refreshDrawableState();
+        }
     }
+
     public void setMargin(boolean isMargin) {
-        this.isMargin = isMargin;
-        refreshDrawableState();
+        if (this.isMargin != isMargin) {
+            this.isMargin = isMargin;
+            refreshDrawableState();
+        }
     }
 
     public void setCurrentMonth(boolean isCurrentMonth) {
-        this.isCurrentMonth = isCurrentMonth;
-        refreshDrawableState();
+    if (this.isCurrentMonth != isCurrentMonth) {
+      this.isCurrentMonth = isCurrentMonth;
+      refreshDrawableState();
     }
+  }
 
     public void setToday(boolean isToday) {
-        this.isToday = isToday;
-        refreshDrawableState();
+    if (this.isToday != isToday) {
+      this.isToday = isToday;
+      refreshDrawableState();
     }
+  }
 
     public void setRangeState(MonthCellDescriptor.RangeState rangeState) {
-        this.rangeState = rangeState;
-        refreshDrawableState();
+    if (this.rangeState != rangeState) {
+      this.rangeState = rangeState;
+      refreshDrawableState();
     }
+  }
 
-    public void setHighlighted(boolean highlighted) {
-        isHighlighted = highlighted;
-        refreshDrawableState();
+  public void setHighlighted(boolean isHighlighted) {
+    if (this.isHighlighted != isHighlighted) {
+      this.isHighlighted = isHighlighted;
+      refreshDrawableState();
     }
+  }
 
     public boolean isCurrentMonth() {
         return isCurrentMonth;
@@ -90,7 +105,7 @@ public class CalendarCellView extends TextView {
 
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
-        final int[] drawableState = super.onCreateDrawableState(extraSpace + 5);
+        final int[] drawableState = super.onCreateDrawableState(extraSpace + 6);
 
         if (isSelectable) {
             mergeDrawableStates(drawableState, STATE_SELECTABLE);
@@ -120,5 +135,18 @@ public class CalendarCellView extends TextView {
         }
 
         return drawableState;
+  }
+
+  public void setDayOfMonthTextView(TextView textView) {
+    dayOfMonthTextView = textView;
+  }
+
+  public TextView getDayOfMonthTextView() {
+    if (dayOfMonthTextView == null) {
+      throw new IllegalStateException(
+              "You have to setDayOfMonthTextView in your custom DayViewAdapter."
+      );
+    }
+    return dayOfMonthTextView;
     }
 }

@@ -20,7 +20,6 @@ import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,16 +65,15 @@ public class CalendarPickerView extends ListView {
     }
 
     private final CalendarPickerView.MonthAdapter adapter;
-    private final List<List<List<MonthCellDescriptor>>> cells =
-            new ArrayList<List<List<MonthCellDescriptor>>>();
+  private final List<List<List<MonthCellDescriptor>>> cells = new ArrayList<>();
     final MonthView.Listener listener = new CellClickedListener();
-    final List<MonthDescriptor> months = new ArrayList<MonthDescriptor>();
-    final List<MonthCellDescriptor> selectedCells = new ArrayList<MonthCellDescriptor>();
-    final List<MonthCellDescriptor> marginCells = new ArrayList<MonthCellDescriptor>();
-    final List<MonthCellDescriptor> highlightedCells = new ArrayList<MonthCellDescriptor>();
-    final List<Calendar> selectedCals = new ArrayList<Calendar>();
-    final List<Calendar> marginCals = new ArrayList<Calendar>();
-    final List<Calendar> highlightedCals = new ArrayList<Calendar>();
+  final List<MonthDescriptor> months = new ArrayList<>();
+  final List<MonthCellDescriptor> selectedCells = new ArrayList<>();
+    final List<MonthCellDescriptor> marginCells = new ArrayList<>();
+    final List<MonthCellDescriptor> highlightedCells = new ArrayList<>();
+  final List<Calendar> selectedCals = new ArrayList<>();
+  final List<Calendar> highlightedCals = new ArrayList<>();
+    final List<Calendar> marginCals = new ArrayList<>();
     private Locale locale;
     private DateFormat monthNameFormat;
     private DateFormat weekdayNameFormat;
@@ -101,6 +99,7 @@ public class CalendarPickerView extends ListView {
             new DefaultOnInvalidDateSelectedListener();
     private CellClickInterceptor cellClickInterceptor;
     private List<CalendarCellDecorator> decorators;
+  private DayViewAdapter dayViewAdapter = new DefaultDayViewAdapter();
 
 
     public void setDecorators(List<CalendarCellDecorator> decorators) {
@@ -286,7 +285,7 @@ public class CalendarPickerView extends ListView {
          * visible.
          */
         public FluentInitializer withSelectedDate(Date selectedDates) {
-            return withSelectedDates(Arrays.asList(selectedDates));
+      return withSelectedDates(Collections.singletonList(selectedDates));
         }
 
         /**
@@ -320,7 +319,7 @@ public class CalendarPickerView extends ListView {
         }
 
         public FluentInitializer withHighlightedDate(Date date) {
-            return withHighlightedDates(Arrays.asList(date));
+      return withHighlightedDates(Collections.singletonList(date));
         }
 
     @SuppressLint("SimpleDateFormat")
@@ -530,7 +529,7 @@ public class CalendarPickerView extends ListView {
     }
 
     public List<Date> getSelectedDates() {
-        List<Date> selectedDates = new ArrayList<Date>();
+    List<Date> selectedDates = new ArrayList<>();
         for (MonthCellDescriptor cal : selectedCells) {
             selectedDates.add(cal.getDate());
         }
@@ -894,11 +893,13 @@ public class CalendarPickerView extends ListView {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             MonthView monthView = (MonthView) convertView;
-            if (monthView == null) {
+      if (monthView == null
+             || !monthView.getTag(R.id.day_view_adapter_class).equals(dayViewAdapter.getClass())) {
                 monthView =
                         MonthView.create(parent, inflater, weekdayNameFormat, listener, today, dividerColor,
                                 dayBackgroundResId, dayTextColorResId, titleTextColor, displayHeader,
-                                headerTextColor, decorators, locale);
+                headerTextColor, decorators, locale, dayViewAdapter);
+        monthView.setTag(R.id.day_view_adapter_class, dayViewAdapter.getClass());
             } else {
                 monthView.setDecorators(decorators);
             }
@@ -911,7 +912,7 @@ public class CalendarPickerView extends ListView {
     List<List<MonthCellDescriptor>> getMonthCells(MonthDescriptor month, Calendar startCal) {
         Calendar cal = Calendar.getInstance(locale);
         cal.setTime(startCal.getTime());
-        List<List<MonthCellDescriptor>> cells = new ArrayList<List<MonthCellDescriptor>>();
+    List<List<MonthCellDescriptor>> cells = new ArrayList<>();
         cal.set(DAY_OF_MONTH, 1);
         int firstDayOfWeek = cal.get(DAY_OF_WEEK);
         int offset = cal.getFirstDayOfWeek() - firstDayOfWeek;
@@ -926,7 +927,7 @@ public class CalendarPickerView extends ListView {
         while ((cal.get(MONTH) < month.getMonth() + 1 || cal.get(YEAR) < month.getYear()) //
                 && cal.get(YEAR) <= month.getYear()) {
             Logr.d("Building week row starting at %s", cal.getTime());
-            List<MonthCellDescriptor> weekCells = new ArrayList<MonthCellDescriptor>();
+      List<MonthCellDescriptor> weekCells = new ArrayList<>();
             cells.add(weekCells);
             for (int c = 0; c < 7; c++) {
                 Date date = cal.getTime();
@@ -1038,6 +1039,20 @@ public class CalendarPickerView extends ListView {
      */
     public void setDateSelectableFilter(DateSelectableFilter listener) {
         dateConfiguredListener = listener;
+  }
+
+
+  /**
+   * Set an adapter used to initialize {@link CalendarCellView} with custom layout.
+   * <p>
+   * Important: set this before you call {@link #init(Date, Date)} methods.  If called afterwards,
+   * it will not be consistently applied.
+   */
+  public void setCustomDayView(DayViewAdapter dayViewAdapter) {
+    this.dayViewAdapter = dayViewAdapter;
+    if (null != adapter) {
+      adapter.notifyDataSetChanged();
+    }
     }
 
     /**
