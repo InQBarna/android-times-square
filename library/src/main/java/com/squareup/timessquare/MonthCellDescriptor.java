@@ -9,7 +9,7 @@ import java.util.Date;
  */
 class MonthCellDescriptor {
     public enum RangeState {
-        NONE, FIRST, MIDDLE, LAST
+        NONE, FIRST, MIDDLE, LAST, SINGLE
     }
 
     private final Date date;
